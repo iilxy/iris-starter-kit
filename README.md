@@ -103,7 +103,8 @@ Install dependencies:
 ```bash
 $ npm install
 $ webpack
-$ cd server && go get ./... && cd ../
+$ go get github.com/kataras/iris/v12@v12.2.0-alpha
+$ go get -u github.com/go-bindata/go-bindata/...
 ```
 
 ## Run development
@@ -112,7 +113,8 @@ Start dev server:
 
 ```bash
 $ cd server
-$ go-bindata ./data/...
+# $ go-bindata -o ./data/static/static.go -pkg static -fs -prefix "data/static" ./data/static/...
+# $ go-bindata -o ./data/templates/templates.go -pkg templates -fs -prefix "data/templates" ./data/templates/...
 $ go build
 $ server run # ./server.exe run
 ```

@@ -1,11 +1,14 @@
 package main
 
 import (
-	"github.com/kataras/iris/v12"
-	"github.com/kataras/iris/v12/middleware/logger"
-	"github.com/kataras/iris/v12/middleware/recover"
+	"github.com/iris-contrib/iris-starter-kit/server/data/static"
+	"github.com/iris-contrib/iris-starter-kit/server/data/templates"
 
-	uuid "github.com/nu7hatch/gouuid"
+	"github.com/kataras/iris/v12"
+	"github.com/kataras/iris/v12/middleware/accesslog"
+	"github.com/kataras/iris/v12/middleware/recover"
+	"github.com/kataras/iris/v12/middleware/requestid"
+
 	"github.com/olebedev/config"
 )
 
@@ -47,26 +50,25 @@ func NewApp(opts ...AppOptions) *App {
 	// Make an engine
 	srv := iris.New()
 
-	// Use precompiled embedded templates
-	srv.RegisterView(iris.HTML("./data/templates", ".html").Binary(Asset, AssetNames))
+	// Use precompiled embedded templates: remove any existing .go files before:
+	// go-bindata -o ./data/templates/templates.go -pkg templates -fs -prefix "data/templates" ./data/templates/...
+	srv.RegisterView(iris.HTML(templates.AssetFile(), ".html"))
 
 	// Set up debug level for iris logger
 	if conf.UBool("debug") {
 		srv.Logger().SetLevel("debug")
 	}
 
-	// Regular middlewares
-	srv.UseGlobal(recover.New())
-
+	// Middlewares that should be registered
+	// everywhere, all routes, and even not founds.
+	//
+	// Logger, will execute the next and then log the request-response lifecycle.
+	ac := accesslog.File("./access.log") // its Close is handled on CTRL/CMD+C automatically.
+	srv.UseRouter(ac.Handler)
 	// Map app and uuid for every requests
-	srv.UseGlobal(func(ctx iris.Context) {
-		id, err := uuid.NewV4()
-		if err == nil {
-			ctx.Values().Set("uuid", id)
-		}
-		// ctx.Values().Set("app", app)
-		ctx.Next()
-	})
+	srv.UseRouter(requestid.New())
+	// Recover middleware.
+	srv.UseRouter(recover.New())
 
 	// Favicon
 	srv.Favicon("./data/static/images/favicon.ico")
@@ -82,17 +84,9 @@ func NewApp(opts ...AppOptions) *App {
 		),
 	}
 
-	// Serve static via bindata
-	srv.HandleDir("/static", "./data/static", iris.DirOptions{Asset: Asset, AssetNames: AssetNames})
-
-	// Request Logger with columns
-	srv.Use(logger.New(logger.Config{
-		Columns: true,
-		Status:  true,
-		IP:      true,
-		Method:  true,
-		Path:    true,
-	}))
+	// Serve static via bindata ./data/static
+	// go-bindata -o ./data/static/static.go -pkg static -fs -prefix "data/static" ./data/static/...
+	srv.HandleDir("/static", static.AssetFile())
 
 	api := NewAPI(app)
 
@@ -119,9 +113,7 @@ func NewApp(opts ...AppOptions) *App {
 
 // Run runs the app
 func (app *App) Run() {
-	Must(app.Server.Run(
-		iris.Addr(":"+app.Conf.UString("port")),
-		iris.WithoutServerError(iris.ErrServerClosed)))
+	Must(app.Server.Listen(":" + app.Conf.UString("port")))
 }
 
 // AppOptions is options struct

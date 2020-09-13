@@ -10,13 +10,14 @@ import (
 	"runtime"
 	"time"
 
+	"github.com/iris-contrib/iris-starter-kit/server/data/static"
+
 	"github.com/kataras/iris/v12"
 
 	"github.com/dop251/goja"
 	"github.com/dop251/goja_nodejs/eventloop"
 
 	"github.com/fatih/structs"
-	"github.com/nu7hatch/gouuid"
 	"github.com/olebedev/gojax/fetch"
 )
 
@@ -54,12 +55,12 @@ func NewReact(filePath string, debug bool, proxy http.Handler) *React {
 // have not been caught via static file
 // handler or other middlewares.
 func (r *React) Handle(ctx iris.Context) {
-	UUID := ctx.Values().Get("uuid").(*uuid.UUID)
+	reqID := ctx.GetID().(string)
 	defer func() {
 		if r := recover(); r != nil {
 			ctx.StatusCode(iris.StatusInternalServerError)
 			ctx.ViewData("", Resp{
-				UUID:  UUID.String(),
+				UUID:  reqID,
 				Error: r.(string),
 			})
 			ctx.View("react.html")
@@ -73,7 +74,7 @@ func (r *React) Handle(ctx iris.Context) {
 	case re := <-vm.Handle(map[string]interface{}{
 		"url":     ctx.Request().URL.String(),
 		"headers": map[string][]string(ctx.Request().Header),
-		"uuid":    UUID.String(),
+		"uuid":    reqID,
 	}):
 		// Return vm back to the pool
 		r.put(vm)
@@ -101,7 +102,7 @@ func (r *React) Handle(ctx iris.Context) {
 		r.drop(vm)
 		ctx.StatusCode(iris.StatusInternalServerError)
 		ctx.ViewData("", Resp{
-			UUID:  UUID.String(),
+			UUID:  reqID,
 			Error: "timeout",
 		})
 		ctx.View("react.html")
@@ -193,7 +194,7 @@ func newJSVM(filePath string, proxy http.Handler) *JSVM {
 
 	vm.EventLoop.Start()
 	fetch.Enable(vm.EventLoop, proxy)
-	bundle := MustAsset(filePath)
+	bundle := static.MustAsset(filePath)
 
 	vm.EventLoop.RunOnLoop(func(_vm *goja.Runtime) {
 		var seed int64
