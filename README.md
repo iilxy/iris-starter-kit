@@ -113,8 +113,7 @@ Start dev server:
 
 ```bash
 $ cd server
-# $ go-bindata -o ./data/static/static.go -pkg static -fs -prefix "data/static" ./data/static/...
-# $ go-bindata -o ./data/templates/templates.go -pkg templates -fs -prefix "data/templates" ./data/templates/...
+$ go-bindata -fs ./data/...
 $ go build
 $ server run # ./server.exe run
 ```

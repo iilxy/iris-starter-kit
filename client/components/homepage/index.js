@@ -18,12 +18,12 @@ export default class Homepage extends Component {
         meta={[
           {
             property: 'og:title',
-            content: 'Golang Isomorphic React/Hot Reloadable/Redux/Css-Modules Starter Kit'
+            content: 'Iris Golang Isomorphic React/Hot Reloadable/Redux/Css-Modules Starter Kit'
           }
         ]} />
       <h1 className={example}>
         Hot Reloadable <br />
-        Golang + React + Redux + Css-Modules
+        Iris Golang + React + Redux + Css-Modules
         <br />Isomorphic Starter Kit</h1>
       <br />
       <p className={p}>

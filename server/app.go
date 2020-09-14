@@ -1,9 +1,6 @@
 package main
 
 import (
-	"github.com/iris-contrib/iris-starter-kit/server/data/static"
-	"github.com/iris-contrib/iris-starter-kit/server/data/templates"
-
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/middleware/accesslog"
 	"github.com/kataras/iris/v12/middleware/recover"
@@ -49,10 +46,8 @@ func NewApp(opts ...AppOptions) *App {
 
 	// Make an engine
 	srv := iris.New()
-
 	// Use precompiled embedded templates: remove any existing .go files before:
-	// go-bindata -o ./data/templates/templates.go -pkg templates -fs -prefix "data/templates" ./data/templates/...
-	srv.RegisterView(iris.HTML(templates.AssetFile(), ".html"))
+	srv.RegisterView(iris.HTML(iris.PrefixDir("./data/templates", AssetFile()), ".html"))
 
 	// Set up debug level for iris logger
 	if conf.UBool("debug") {
@@ -85,8 +80,7 @@ func NewApp(opts ...AppOptions) *App {
 	}
 
 	// Serve static via bindata ./data/static
-	// go-bindata -o ./data/static/static.go -pkg static -fs -prefix "data/static" ./data/static/...
-	srv.HandleDir("/static", static.AssetFile())
+	srv.HandleDir("/static", iris.PrefixDir("./data/static", AssetFile()))
 
 	api := NewAPI(app)
 

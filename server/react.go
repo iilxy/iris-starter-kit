@@ -10,8 +10,6 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/iris-contrib/iris-starter-kit/server/data/static"
-
 	"github.com/kataras/iris/v12"
 
 	"github.com/dop251/goja"
@@ -194,7 +192,7 @@ func newJSVM(filePath string, proxy http.Handler) *JSVM {
 
 	vm.EventLoop.Start()
 	fetch.Enable(vm.EventLoop, proxy)
-	bundle := static.MustAsset(filePath)
+	bundle := MustAsset(filePath)
 
 	vm.EventLoop.RunOnLoop(func(_vm *goja.Runtime) {
 		var seed int64

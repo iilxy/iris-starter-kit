@@ -30006,14 +30006,14 @@
 	          title: 'Home page',
 	          meta: [{
 	            property: 'og:title',
-	            content: 'Golang Isomorphic React/Hot Reloadable/Redux/Css-Modules Starter Kit'
+	            content: 'Iris Golang Isomorphic React/Hot Reloadable/Redux/Css-Modules Starter Kit'
 	          }] }),
 	        _react2.default.createElement(
 	          'h1',
 	          { className: _styles.example },
 	          'Hot Reloadable ',
 	          _react2.default.createElement('br', null),
-	          'Golang + React + Redux + Css-Modules',
+	          'Iris Golang + React + Redux + Css-Modules',
 	          _react2.default.createElement('br', null),
 	          'Isomorphic Starter Kit'
 	        ),
